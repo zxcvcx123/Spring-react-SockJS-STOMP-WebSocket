@@ -4,6 +4,9 @@ import * as SockJS from "sockjs-client";
 import { Spinner } from "@chakra-ui/react";
 
 function Socket({ children }) {
+  // Stomp JS: https://stomp-js.github.io/stomp-websocket/codo/extra/docs-src/Usage.md.html#toc_5
+  // Stomp JS: https://stomp-js.github.io/api-docs/latest/index.html
+
   // 소켓 연결
   const stompClient = useRef(); // useRef로 connect()가 안끊기게하기
 
@@ -45,15 +48,15 @@ function Socket({ children }) {
 
       // 연결
       if (stompClient.current.connected === false) {
-        
         // 서버가 재시작 되도 자동 재연결 시간 설정
         stompClient.current.configure({
           reconnectDelay: 2000, // 2초
         });
-        
+
         stompClient.current.connect({}, () => {
           chatSocket(); // 채팅
           boardLikeSocket(); // 좋아요
+          boardCommentAlramSocket(); // 댓글알람
           setIsConnected(true);
         });
       }
@@ -97,14 +100,11 @@ function Socket({ children }) {
   const boardCommentAlramSocket = () => {
     console.log("댓글 알람 소켓연결");
 
-    stompClient.current.subscribe(
-      "/queue/comment/alarm/" + "테스트계정1",
-      (res1) => {
-        console.log(res1.body);
-        const data1 = JSON.parse(res1.body);
-        setLike(data1.like);
-      },
-    );
+    stompClient.current.subscribe("/queue/comment/alarm/" + "abcd", (res1) => {
+      console.log(res1.body);
+      const data1 = JSON.parse(res1.body);
+      setLike(data1.like);
+    });
   };
 
   return (
